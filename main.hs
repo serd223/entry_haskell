@@ -156,14 +156,7 @@ setNth :: Int -> a -> [a] -> [a]
 setNth idx x = mapNth idx (const x)
 
 mapNth :: Int -> (a -> a) -> [a] -> [a]
-mapNth idx f xs = map (\(i, n) -> if i == idx then f n else n) (enumerate xs)
-
-enumerate :: [a] -> [(Int, a)]
-enumerate xs = let (_, res, _) = enumerateInner (reverse xs, [], length xs - 1) in res
-
-enumerateInner :: ([a], [(Int, a)], Int) -> ([a], [(Int, a)], Int)
-enumerateInner ([], ixs, -1) = ([], ixs, -1)
-enumerateInner (x : rest, ixs, i) = enumerateInner (rest, (i, x) : ixs, i - 1)
+mapNth idx f = zipWith (\ i n -> (if i == idx then f n else n)) [0..]
 
 startsWith :: (Eq a) => [a] -> [a] -> Bool
 startsWith prefix l = (length prefix <= length l) && and (zipWith (==) prefix l)
