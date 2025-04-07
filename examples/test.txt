@@ -1,0 +1,20 @@
+fi
+add
+add  add  add  add  add  add  add  add  add
+add  add  add  add  add  add  add  add  add
+add  add  add  add  add  add  add  add  add
+add  add  add  add  add  add  add  add  add
+add  add  add  add  add  add  add  add  add
+add  add  add  add  add  add  add  add  add
+add  add  add  add  add  add  add  add  add
+add  add  add  add  add  add  add  add  add
+print
+add
+print
+add
+print
+dec dec
+print
+>
+add add add add add add add add add add
+print 

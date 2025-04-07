@@ -1,0 +1,28 @@
+add add add add add add add add
+if rev dec > add add add add add add add add add < fi rev > dec
+
+> > > add add add add add add add add add add add
+if rev dec > add add add add add add add add add add add add < fi rev >
+print
+dec dec dec
+print
+add add add add add add add
+print print
+add add add
+print
+>
+add add 
+if rev dec < add add add add > fi rev <
+< < < < print dec dec dec dec dec dec dec dec dec dec dec dec print > > > >
+print
+>
+add add add
+if rev dec < dec dec dec dec > fi rev <
+print
+add add add print
+dec dec dec dec dec dec print
+dec dec dec dec dec dec dec dec print
+< < < < add print > > > >
+
+> > > add add add add add add add add add add
+print
