@@ -1,8 +1,8 @@
 add add add add add add add add
-if rev dec > add add add add add add add add add < fi rev > dec
+ifrevdec> add add add add add add add add add <firev> dec
 
-> > > add add add add add add add add add add add
-if rev dec > add add add add add add add add add add add add < fi rev >
+>>> add add add add add add add add add add add
+ifrevdec> add add add add add add add add add add add add <firev>
 print
 dec dec dec
 print
@@ -12,17 +12,17 @@ add add add
 print
 >
 add add 
-if rev dec < add add add add > fi rev <
-< < < < print dec dec dec dec dec dec dec dec dec dec dec dec print > > > >
+ifrevdec< add add add add >firev<
+<<<< print dec dec dec dec dec dec dec dec dec dec dec dec print >>>>
 print
 >
 add add add
-if rev dec < dec dec dec dec > fi rev <
+ifrevdec< dec dec dec dec >firev<
 print
 add add add print
 dec dec dec dec dec dec print
 dec dec dec dec dec dec dec dec print
-< < < < add print > > > >
+<<<< add print >>>>
 
-> > > add add add add add add add add add add
+>>> add add add add add add add add add add
 print

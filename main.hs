@@ -7,7 +7,7 @@ main = do
   progName <- getProgName
   if null args
     then putStrLn $ "Usage: " ++ progName ++ " <code>"
-    else run . parse . tokenize . head $ args
+    else run . parse . head $ args
 
 run :: [Keyword] -> IO ()
 run kws = runInner ([], [], kws, newInterpreter)
@@ -24,14 +24,12 @@ runInner d = case interpretAll $ Intermediate d of
       else runInner ([], old, kws, Interpreter {stack = setNth sp (ord $ head l) st, stack_ptr = sp, skip = sk, rev = rv})
   Quit ios -> unwrapIo $ reverse ios
 
-
 repromptUntilInput :: IO [Char] -> IO [Char]
 repromptUntilInput ioc = do
   l <- ioc
   if null l
     then repromptUntilInput ioc
     else return l
-  
 
 unwrapIo :: [IO ()] -> IO ()
 unwrapIo [] = return ()
@@ -39,21 +37,24 @@ unwrapIo (io : rest) = do
   _ <- io
   unwrapIo rest
 
+stackSize :: Int
+stackSize = 256
+
 data Interpreter = Interpreter {stack :: [Int], stack_ptr :: Int, skip :: Bool, rev :: Bool} deriving (Show)
 
 newInterpreter :: Interpreter
-newInterpreter = Interpreter {stack = replicate 256 0, stack_ptr = 0, skip = False, rev = False}
+newInterpreter = Interpreter {stack = replicate stackSize 0, stack_ptr = 0, skip = False, rev = False}
 
 iLeft :: Interpreter -> Interpreter
 iLeft Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv} =
   if not sk
-    then Interpreter {stack = st, stack_ptr = sp - 1, skip = sk, rev = rv}
+    then Interpreter {stack = st, stack_ptr = if sp > 0 then sp - 1 else stackSize - 1, skip = sk, rev = rv}
     else Interpreter {stack = st, stack_ptr = sp, skip = False, rev = rv}
 
 iRight :: Interpreter -> Interpreter
 iRight Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv} =
   if not sk
-    then Interpreter {stack = st, stack_ptr = sp + 1, skip = sk, rev = rv}
+    then Interpreter {stack = st, stack_ptr = if sp + 1 < stackSize then sp + 1 else 0, skip = sk, rev = rv}
     else Interpreter {stack = st, stack_ptr = sp, skip = False, rev = rv}
 
 iAdd :: Interpreter -> Interpreter
@@ -118,28 +119,25 @@ interpretAll (Intermediate (ios, old, kw : rest, i)) = case interpret i kw of
       else interpretAll (Intermediate (io : ios, kw : rest, old, Interpreter {stack = stack i', stack_ptr = stack_ptr i', skip = skip i', rev = False}))
   Request ioc -> Pause (ioc, ios, kw : old, rest, i)
 
-newtype Tokens = Tokens [String] deriving (Show)
-
 data Keyword = Left | Right | Add | Dec | Print | If | Fi | Rev | Input deriving (Show)
 
-parse :: Tokens -> [Keyword]
-parse (Tokens []) = []
-parse (Tokens tokens) =
-  let k = case head tokens of
-        "<" -> Main.Left
-        ">" -> Main.Right
-        "add" -> Add
-        "dec" -> Dec
-        "print" -> Print
-        "if" -> If
-        "fi" -> Fi
-        "rev" -> Rev
-        "input" -> Input
-        s -> error $ "Invalid token: " ++ s ++ "."
-   in k : (parse . Tokens . tail $ tokens)
-
-tokenize :: String -> Tokens
-tokenize = Tokens . words
+parse :: String -> [Keyword]
+parse [] = []
+parse tokens =
+  let kw
+        | startsWith "<" tokens = Just Main.Left
+        | startsWith ">" tokens = Just Main.Right
+        | startsWith "add" tokens = Just Add
+        | startsWith "dec" tokens = Just Dec
+        | startsWith "print" tokens = Just Print
+        | startsWith "if" tokens = Just If
+        | startsWith "fi" tokens = Just Fi
+        | startsWith "rev" tokens = Just Rev
+        | startsWith "input" tokens = Just Input
+        | otherwise = Nothing
+   in case kw of
+        Just k -> k : parse (tail tokens)
+        Nothing -> parse (tail tokens)
 
 ------------------------------------------------------------------------
 
@@ -160,3 +158,6 @@ enumerate xs = let (_, res, _) = enumerateInner (reverse xs, [], length xs - 1) 
 enumerateInner :: ([a], [(Int, a)], Int) -> ([a], [(Int, a)], Int)
 enumerateInner ([], ixs, -1) = ([], ixs, -1)
 enumerateInner (x : rest, ixs, i) = enumerateInner (rest, (i, x) : ixs, i - 1)
+
+startsWith :: (Eq a) => [a] -> [a] -> Bool
+startsWith prefix l = (length prefix <= length l) && and (zipWith (==) prefix l)
