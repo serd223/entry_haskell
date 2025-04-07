@@ -15,13 +15,13 @@ run kws = runInner ([], [], kws, newInterpreter)
 runInner :: ([IO ()], [Keyword], [Keyword], Interpreter) -> IO ()
 runInner d = case interpretAll $ Intermediate d of
   Intermediate d' -> runInner d'
-  Pause (ioc, ios, old, kws, Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv, dir = d}) -> do
+  Pause (ioc, ios, old, kws, i@Interpreter {stack = st, stack_ptr = sp}) -> do
     unwrapIo $ reverse ios
     hFlush stdout
     l <- repromptUntilInput ioc
     if null l
       then return ()
-      else runInner ([], old, kws, Interpreter {stack = setNth sp (ord $ head l) st, stack_ptr = sp, skip = sk, rev = rv, dir = d})
+      else runInner ([], old, kws, i {stack = setNth sp (ord $ head l) st, stack_ptr = sp})
   Quit ios -> unwrapIo $ reverse ios
 
 repromptUntilInput :: IO [Char] -> IO [Char]
@@ -52,52 +52,52 @@ nudgeStackPtr d sp
   | otherwise = sp + d
 
 iLeft :: Interpreter -> Interpreter
-iLeft Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv, dir = d} =
+iLeft i@Interpreter {stack_ptr = sp, skip = sk, dir = d} =
   if not sk
-    then Interpreter {stack = st, stack_ptr = nudgeStackPtr (negate d) sp, skip = sk, rev = rv, dir = d}
-    else Interpreter {stack = st, stack_ptr = sp, skip = False, rev = rv, dir = d}
+    then i {stack_ptr = nudgeStackPtr (negate d) sp}
+    else i {skip = False}
 
 iRight :: Interpreter -> Interpreter
-iRight Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv, dir = d} =
+iRight i@Interpreter {stack_ptr = sp, skip = sk, dir = d} =
   if not sk
-    then Interpreter {stack = st, stack_ptr = nudgeStackPtr d sp, skip = sk, rev = rv, dir = d}
-    else Interpreter {stack = st, stack_ptr = sp, skip = False, rev = rv, dir = d}
+    then i {stack_ptr = nudgeStackPtr d sp}
+    else i {skip = False}
 
 iAdd :: Interpreter -> Interpreter
-iAdd Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv, dir = d} =
+iAdd i@Interpreter {stack = st, stack_ptr = sp, skip = sk} =
   if not sk
-    then Interpreter {stack = mapNth sp (+ 1) st, stack_ptr = sp, skip = sk, rev = rv, dir = d}
-    else Interpreter {stack = st, stack_ptr = sp, skip = False, rev = rv, dir = d}
+    then i {stack = mapNth sp (+ 1) st}
+    else i {skip = False}
 
 iDec :: Interpreter -> Interpreter
-iDec Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv, dir = d} =
+iDec i@Interpreter {stack = st, stack_ptr = sp, skip = sk} =
   if not sk
-    then Interpreter {stack = mapNth sp (subtract 1) st, stack_ptr = sp, skip = sk, rev = rv, dir = d}
-    else Interpreter {stack = st, stack_ptr = sp, skip = False, rev = rv, dir = d}
+    then i {stack = mapNth sp (subtract 1) st}
+    else i {skip = False}
 
 iPrint :: Interpreter -> (Interpreter, IO ())
-iPrint i@Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv, dir = d} =
+iPrint i@Interpreter {stack = st, stack_ptr = sp, skip = sk} =
   if not sk
-    then (i, putChar . chr . nth (stack_ptr i) . stack $ i)
-    else (Interpreter {stack = st, stack_ptr = sp, skip = False, rev = rv, dir = d}, return ())
+    then (i, putChar . chr . nth sp $ st)
+    else (i {skip = False}, return ())
 
 iIf :: Interpreter -> Interpreter
-iIf Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv, dir = d} =
+iIf i@Interpreter {stack = st, stack_ptr = sp, skip = sk} =
   if not sk
-    then Interpreter {stack = st, stack_ptr = sp, skip = nth sp st > 0, rev = rv, dir = d}
-    else Interpreter {stack = st, stack_ptr = sp, skip = False, rev = rv, dir = d}
+    then i {skip = nth sp st > 0}
+    else i {skip = False}
 
 iFi :: Interpreter -> Interpreter
-iFi Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv, dir = d} =
+iFi i@Interpreter {stack = st, stack_ptr = sp, skip = sk} =
   if not sk
-    then Interpreter {stack = st, stack_ptr = sp, skip = nth sp st <= 0, rev = rv, dir = d}
-    else Interpreter {stack = st, stack_ptr = sp, skip = False, rev = rv, dir = d}
+    then i {skip = nth sp st <= 0}
+    else i {skip = False}
 
 iRev :: Interpreter -> Interpreter
-iRev Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv, dir = d} =
+iRev i@Interpreter {skip = sk, rev = rv, dir = d} =
   if not sk
-    then Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = not rv, dir = negate d}
-    else Interpreter {stack = st, stack_ptr = sp, skip = False, rev = rv, dir = d}
+    then i {rev = not rv, dir = negate d}
+    else i {skip = False}
 
 data CycleResult = Continue (Interpreter, IO ()) | Request (IO [Char])
 
