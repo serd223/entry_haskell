@@ -7,6 +7,7 @@ Implementation of a very basic stack based language interpreter in Haskell.
 
 ## Instructions
 ```console
+  $ ghc main
   $ ./run.sh hello_world
   $ ./run.sh test
 ```

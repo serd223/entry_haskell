@@ -18,3 +18,12 @@ print
 >
 add add add add add add add add add add
 print 
+
+>
+input
+print
+add add add
+print
+> input
+print
+< < print
