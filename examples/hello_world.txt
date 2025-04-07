@@ -1,28 +1,22 @@
-add add add add add add add add
-ifrevdec> add add add add add add add add add <firev> dec
+<addaddaddaddaddaddaddaddaddadd
+<<addaddaddaddaddaddaddaddaddaddadd
+ifrevdec> addaddaddadd <firev>>>
 
->>> add add add add add add add add add add add
-ifrevdec> add add add add add add add add add add add add <firev>
+addaddaddaddaddaddaddaddadd
+ifrevdec> addaddaddaddaddaddaddadd <firev>
 print
-dec dec dec
-print
-add add add add add add add
-print print
-add add add
-print
->
-add add 
-ifrevdec< add add add add >firev<
-<<<< print dec dec dec dec dec dec dec dec dec dec dec dec print >>>>
-print
->
-add add add
-ifrevdec< dec dec dec dec >firev<
-print
-add add add print
-dec dec dec dec dec dec print
-dec dec dec dec dec dec dec dec print
-<<<< add print >>>>
 
->>> add add add add add add add add add add
-print
+decdecdec print
+addaddaddaddaddaddadd printprint
+addaddadd print
+<<<print
+< add add add
+ifrevdec> decdecdecdec <firev>
+print>>>
+addaddaddaddaddaddaddadd print
+decdecdecdecdecdecdecdec print
+addaddadd print
+decdecdecdecdecdec print
+decdecdecdecdecdecdecdec print
+<<<add print
+>print
