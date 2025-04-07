@@ -48,7 +48,7 @@ newInterpreter = Interpreter {stack = replicate stackSize 0, stack_ptr = 0, skip
 nudgeStackPtr :: Int -> Int -> Int
 nudgeStackPtr d sp
   | d > 0 = if sp + d >= stackSize then 0 else sp + d
-  | sp + d < 0 = stackSize -1
+  | sp + d < 0 = stackSize - 1
   | otherwise = sp + d
 
 iLeft :: Interpreter -> Interpreter
@@ -96,7 +96,7 @@ iFi Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv, dir = d} =
 iRev :: Interpreter -> Interpreter
 iRev Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = rv, dir = d} =
   if not sk
-    then Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = not rv, dir = d}
+    then Interpreter {stack = st, stack_ptr = sp, skip = sk, rev = not rv, dir = negate d}
     else Interpreter {stack = st, stack_ptr = sp, skip = False, rev = rv, dir = d}
 
 data CycleResult = Continue (Interpreter, IO ()) | Request (IO [Char])
@@ -122,7 +122,7 @@ interpretAll (Intermediate (ios, old, kw : rest, i)) = case interpret i kw of
   Continue (i', io) ->
     if not $ rev i'
       then interpretAll (Intermediate (io : ios, kw : old, rest, i'))
-      else interpretAll (Intermediate (io : ios, kw : rest, old, Interpreter {stack = stack i', stack_ptr = stack_ptr i', skip = skip i', rev = False, dir = negate $ dir i'}))
+      else interpretAll (Intermediate (io : ios, kw : rest, old, Interpreter {stack = stack i', stack_ptr = stack_ptr i', skip = skip i', rev = False, dir = dir i'}))
   Request ioc -> Pause (ioc, ios, kw : old, rest, i)
 
 data Keyword = Left | Right | Add | Dec | Print | If | Fi | Rev | Input deriving (Show)
@@ -156,7 +156,7 @@ setNth :: Int -> a -> [a] -> [a]
 setNth idx x = mapNth idx (const x)
 
 mapNth :: Int -> (a -> a) -> [a] -> [a]
-mapNth idx f = zipWith (\ i n -> (if i == idx then f n else n)) [0..]
+mapNth idx f = zipWith (\i n -> (if i == idx then f n else n)) [0 ..]
 
 startsWith :: (Eq a) => [a] -> [a] -> Bool
 startsWith prefix l = (length prefix <= length l) && and (zipWith (==) prefix l)
