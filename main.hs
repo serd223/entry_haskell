@@ -78,19 +78,19 @@ iDec i@Interpreter {stack = st, stack_ptr = sp, skip = sk} =
 iPrint :: Interpreter -> (Interpreter, IO ())
 iPrint i@Interpreter {stack = st, stack_ptr = sp, skip = sk} =
   if not sk
-    then (i, putChar . chr . nth sp $ st)
+    then (i, putChar . chr $ st !! sp)
     else (i {skip = False}, return ())
 
 iIf :: Interpreter -> Interpreter
 iIf i@Interpreter {stack = st, stack_ptr = sp, skip = sk} =
   if not sk
-    then i {skip = nth sp st > 0}
+    then i {skip = st !! sp > 0}
     else i {skip = False}
 
 iFi :: Interpreter -> Interpreter
 iFi i@Interpreter {stack = st, stack_ptr = sp, skip = sk} =
   if not sk
-    then i {skip = nth sp st <= 0}
+    then i {skip = st !! sp <= 0}
     else i {skip = False}
 
 iRev :: Interpreter -> Interpreter
@@ -122,7 +122,7 @@ interpretAll (Intermediate (ios, old, kw : rest, i)) = case interpret i kw of
   Continue (i', io) ->
     if not $ rev i'
       then interpretAll (Intermediate (io : ios, kw : old, rest, i'))
-      else interpretAll (Intermediate (io : ios, kw : rest, old, Interpreter {stack = stack i', stack_ptr = stack_ptr i', skip = skip i', rev = False, dir = dir i'}))
+      else interpretAll (Intermediate (io : ios, kw : rest, old, i' {rev = False}))
   Request ioc -> Pause (ioc, ios, kw : old, rest, i)
 
 data Keyword = Left | Right | Add | Dec | Print | If | Fi | Rev | Input deriving (Show)
@@ -146,11 +146,6 @@ parse tokens =
         Nothing -> parse (tail tokens)
 
 ------------------------------------------------------------------------
-
-nth :: Int -> [a] -> a
-nth _ [] = error "Index out of bounds"
-nth 0 (x : _) = x
-nth i (x : rest) = nth (i - 1) rest
 
 setNth :: Int -> a -> [a] -> [a]
 setNth idx x = mapNth idx (const x)
